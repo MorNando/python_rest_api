@@ -1,5 +1,5 @@
 """
-This is an example REST API created in Python and Flask
+This is an example REST API created in Python and Flask used as a template for all apis
 """
 
 import argparse
