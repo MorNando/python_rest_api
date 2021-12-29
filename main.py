@@ -64,16 +64,15 @@ resource_fields = {
 class Video(Resource):
     @marshal_with(resource_fields)
     def get(self, video_id):
-        result = VideoModel.query.filter_by(id=video_id).first()
+        result = VideoModel.query.get(video_id)
 
         if not result:
             abort(404, message=f'Could not find video with id [{video_id}]')
         return result
 
-    @marshal_with(resource_fields)
     def put(self, video_id):
         args = video_put_args.parse_args()
-        result = VideoModel.query.filter_by(id=video_id).first()
+        result = VideoModel.query.get(video_id)
         
         if result:
             abort(409, message='Video id taken...')
@@ -81,13 +80,12 @@ class Video(Resource):
         result = VideoModel(id=video_id, name=args['name'], views=args['views'], likes=args['likes'])
         db.session.add(result)
         db.session.commit()
-        return result, 201
+        return 'OK', 201
 
-    @marshal_with(resource_fields)
     def patch(self, video_id):
         args = video_update_args.parse_args()
 
-        result = VideoModel.query.filter_by(id=video_id).first()
+        result = VideoModel.query.get(video_id)
 
         if not result:
             abort(404, message="Video doesn't exist, cannot update")
@@ -102,17 +100,17 @@ class Video(Resource):
             result.likes = args['likes']
         
         db.session.commit()
-        return result
+        return 'OK', 200
 
     def delete(self, video_id):
-        result = VideoModel.query.filter_by(id=video_id).one()
+        result = VideoModel.query.get(video_id)
 
         if not result:
             abort(404, message="Video doesn't exist, cannot delete")
 
         db.session.delete(result)
         db.session.commit()
-        return '', 204
+        return '', 200
 
 api.add_resource(Video, "/video/<int:video_id>")
 
