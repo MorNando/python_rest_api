@@ -29,7 +29,7 @@ argparser.add_argument(
     "-d",
     "--databaseurl",
     default="sqlite:///database.db",
-    help="Pass this argument if you would like to set a custom database url. Default is sqlite:///database.db"
+    help="Would you like to set a custom database url? Default is sqlite:///database.db"
 )
 
 mainargs = argparser.parse_args()
@@ -56,9 +56,27 @@ if mainargs.create:
     db.create_all()
 
 post_args = reqparse.RequestParser()
-post_args.add_argument("name", type=str, help=f"Name of the {object_name} is required", required=True)
-post_args.add_argument("views", type=int, help=f"Views of the {object_name} is required", required=True)
-post_args.add_argument("likes", type=int, help=f"Likes on the {object_name} is required", required=True)
+
+post_args.add_argument(
+    "name",
+    type=str,
+    help=f"Name of the {object_name} is required",
+    required=True
+)
+
+post_args.add_argument(
+    "views",
+    type=int,
+    help=f"Views of the {object_name} is required",
+    required=True
+)
+
+post_args.add_argument(
+    "likes",
+    type=int,
+    help=f"Likes on the {object_name} is required",
+    required=True
+)
 
 update_args = reqparse.RequestParser()
 update_args.add_argument("name", type=str, help=f"Name of the {object_name} is required")
@@ -72,7 +90,15 @@ resource_fields = {
     'likes': fields.Integer
 }
 
-class Obj(Resource):
+class ObjAll(Resource):
+    @marshal_with(resource_fields)
+    def get(self):
+        result = ObjModel.query.all()
+
+        if not result:
+            abort(404, message=f'Could not find any {object_name} in list')
+        return result
+class Obj(ObjAll):
     @marshal_with(resource_fields)
     def get(self, obj_id):
         result = ObjModel.query.get(obj_id)
@@ -120,17 +146,8 @@ class Obj(Resource):
         db.session.commit()
         return '', 200
 
-class ObjAll(Obj):
-    @marshal_with(resource_fields)
-    def get(self):
-        result = ObjModel.query.all()
-
-        if not result:
-            abort(404, message=f'Could not find any {object_name} in list')
-        return result
-
-api.add_resource(Obj, f"/{object_name}/<int:obj_id>")
 api.add_resource(ObjAll, f"/{object_name}")
+api.add_resource(Obj, f"/{object_name}/<int:obj_id>")
 
 if __name__ == "__main__":
     app.run(debug=True)
