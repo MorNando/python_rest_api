@@ -9,14 +9,14 @@ BASE= "http://127.0.0.1:5000/"
 
 # generate data
 data = []
-for i in range(100):
+for i in range(10):
     data += [
         {"name": f"video {str(i)}", "views": randrange(1000, 1000000), "likes": randrange(0, 1000)}
     ]
 
 # put request check
 for i, row in enumerate(data):
-    response = requests.put(BASE + f"video/{str(i)}", row)
+    response = requests.post(BASE + f"video/{str(i)}", row)
     print(response.json())
 
 # get request check
@@ -26,11 +26,16 @@ for i, row in enumerate(data):
 
 # update request check
 for i, row in enumerate(data):
-    response = requests.patch(BASE + f"video/{str(i)}", {
+    response = requests.put(BASE + f"video/{str(i)}", {
         "name": f"amended video {str(i)}",
         "views": randrange(1000, 1000000),
         "likes": randrange(0, 1000)
     })
+    print(response.json())
+
+# get request check to see if they have been updated
+for i, row in enumerate(data):
+    response = requests.get(BASE + f"video/{str(i)}")
     print(response.json())
 
 # delete request check

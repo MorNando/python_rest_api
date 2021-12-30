@@ -6,6 +6,6 @@ It's a work in progress, but the intention is to create a template for all my ot
 
 It currently does:
 - get
+- post
 - put
-- patch
 - delete
