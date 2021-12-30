@@ -55,15 +55,15 @@ class ObjModel(db.Model):
 if mainargs.create:
     db.create_all()
 
-video_put_args = reqparse.RequestParser()
-video_put_args.add_argument("name", type=str, help=f"Name of the {object_name} is required", required=True)
-video_put_args.add_argument("views", type=int, help=f"Views of the {object_name} is required", required=True)
-video_put_args.add_argument("likes", type=int, help=f"Likes on the {object_name} is required", required=True)
+post_args = reqparse.RequestParser()
+post_args.add_argument("name", type=str, help=f"Name of the {object_name} is required", required=True)
+post_args.add_argument("views", type=int, help=f"Views of the {object_name} is required", required=True)
+post_args.add_argument("likes", type=int, help=f"Likes on the {object_name} is required", required=True)
 
-video_update_args = reqparse.RequestParser()
-video_update_args.add_argument("name", type=str, help=f"Name of the {object_name} is required")
-video_update_args.add_argument("views", type=int, help=f"Views of the {object_name} is required")
-video_update_args.add_argument("likes", type=int, help=f"Likes on the {object_name} is required")
+update_args = reqparse.RequestParser()
+update_args.add_argument("name", type=str, help=f"Name of the {object_name} is required")
+update_args.add_argument("views", type=int, help=f"Views of the {object_name} is required")
+update_args.add_argument("likes", type=int, help=f"Likes on the {object_name} is required")
 
 resource_fields = {
     'id': fields.Integer,
@@ -74,32 +74,32 @@ resource_fields = {
 
 class Obj(Resource):
     @marshal_with(resource_fields)
-    def get(self, video_id):
-        result = ObjModel.query.get(video_id)
+    def get(self, obj_id):
+        result = ObjModel.query.get(obj_id)
 
         if not result:
-            abort(404, message=f'Could not find {object_name} with id [{video_id}]')
+            abort(404, message=f'Could not find {object_name} with id [{obj_id}]')
         return result
 
-    def post(self, video_id):
-        args = video_put_args.parse_args()
-        result = ObjModel.query.get(video_id)
+    def post(self, obj_id):
+        args = post_args.parse_args()
+        result = ObjModel.query.get(obj_id)
         
         if result:
-            abort(409, message='Video id taken...')
+            abort(409, message=f'{object_name} id taken...')
 
-        result = ObjModel(id=video_id, name=args['name'], views=args['views'], likes=args['likes'])
+        result = ObjModel(id=obj_id, name=args['name'], views=args['views'], likes=args['likes'])
         db.session.add(result)
         db.session.commit()
         return 'OK', 201
 
-    def put(self, video_id):
-        args = video_update_args.parse_args()
+    def put(self, obj_id):
+        args = update_args.parse_args()
 
-        result = ObjModel.query.get(video_id)
+        result = ObjModel.query.get(obj_id)
 
         if not result:
-            abort(404, message="Video doesn't exist, cannot update")
+            abort(404, message=f"{object_name} doesn't exist, cannot update")
         
         key_list = ObjModel.__table__.columns.keys()
 
@@ -110,8 +110,8 @@ class Obj(Resource):
         db.session.commit()
         return 'OK', 200
 
-    def delete(self, video_id):
-        result = ObjModel.query.get(video_id)
+    def delete(self, obj_id):
+        result = ObjModel.query.get(obj_id)
 
         if not result:
             abort(404, message=f"{object_name} doesn't exist, cannot delete")
@@ -120,7 +120,7 @@ class Obj(Resource):
         db.session.commit()
         return '', 200
 
-api.add_resource(Obj, f"/{object_name}/<int:video_id>")
+api.add_resource(Obj, f"/{object_name}/<int:obj_id>")
 
 if __name__ == "__main__":
     app.run(debug=True)
