@@ -84,7 +84,7 @@ class Obj(Resource):
     def post(self, obj_id):
         args = post_args.parse_args()
         result = ObjModel.query.get(obj_id)
-        
+
         if result:
             abort(409, message=f'{object_name} id taken...')
 
@@ -100,13 +100,13 @@ class Obj(Resource):
 
         if not result:
             abort(404, message=f"{object_name} doesn't exist, cannot update")
-        
+
         key_list = ObjModel.__table__.columns.keys()
 
         for key in key_list:
             if key != 'id' and getattr(result, key):
                 setattr(result, key, args[key])
-        
+
         db.session.commit()
         return 'OK', 200
 
@@ -120,7 +120,17 @@ class Obj(Resource):
         db.session.commit()
         return '', 200
 
+class ObjAll(Obj):
+    @marshal_with(resource_fields)
+    def get(self):
+        result = ObjModel.query.all()
+
+        if not result:
+            abort(404, message=f'Could not find any {object_name} in list')
+        return result
+
 api.add_resource(Obj, f"/{object_name}/<int:obj_id>")
+api.add_resource(ObjAll, f"/{object_name}")
 
 if __name__ == "__main__":
     app.run(debug=True)

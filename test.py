@@ -24,6 +24,10 @@ for i, row in enumerate(data):
     response = requests.get(BASE + f"video/{str(i)}")
     print(response.json())
 
+print("getting all in one go")
+response = requests.get(BASE + "video")
+print(response.json())
+
 # update request check
 for i, row in enumerate(data):
     response = requests.put(BASE + f"video/{str(i)}", {
